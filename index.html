@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f6f3">
+  <title>Lecture 4: Elasticity — Super Simple (5yo ADHD Friendly)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Recursive:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f6f3;
+      --surface: #fff;
+      --text: #1a1a1a;
+      --text-muted: #5c5c5c;
+      --accent: #c45c26;
+      --accent-soft: #f0e6e0;
+      --border: #e5e0db;
+      --tip-bg: #e8f4ea;
+      --tip-border: #7cb87c;
+      --step-num: #2d6a4f;
+      --code-bg: #f0ede8;
+    }
+    [data-theme="dark"] {
+      --bg: #1a1b1e;
+      --surface: #25262b;
+      --text: #e8e6e3;
+      --text-muted: #a0a0a0;
+      --accent: #e88b5c;
+      --accent-soft: #3d2f28;
+      --border: #3d3d42;
+      --tip-bg: #1e3328;
+      --tip-border: #5a9a6e;
+      --step-num: #7cb87c;
+      --code-bg: #2c2d31;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; margin: 0; padding: 0; padding-top: 6px; }
+    .container { max-width: 680px; margin: 0 auto; padding: 1rem 1rem calc(80px + env(safe-area-inset-bottom)); }
+    header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border); }
+    h1 { font-family: 'Recursive', sans-serif; font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--accent); }
+    .theme-toggle { background: var(--surface); border: 2px solid var(--border); color: var(--text); padding: 0.4rem 0.9rem; border-radius: 999px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 600; }
+    .theme-toggle:hover { background: var(--accent-soft); }
+    h2 { font-family: 'Recursive', sans-serif; font-size: 1.2rem; margin: 1.75rem 0 0.6rem; color: var(--text); }
+    h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; color: var(--accent); }
+    p { margin: 0.4rem 0; color: var(--text); font-size: 0.95rem; }
+    .bite { margin: 0.5rem 0; padding: 0.6rem 0.9rem; background: var(--surface); border-radius: 8px; border-left: 4px solid var(--accent); font-size: 0.95rem; }
+    .tldr { background: var(--tip-bg); border: 2px solid var(--tip-border); border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.5rem 0; font-size: 0.9rem; }
+    .tldr strong { color: var(--step-num); }
+    .step-card { background: var(--surface); border: 2px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem 0.9rem 3rem; margin: 0.6rem 0; position: relative; }
+    .step-card .step-num { position: absolute; left: 0.75rem; top: 0.85rem; width: 1.6rem; height: 1.6rem; background: var(--step-num); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+    .example-box { background: var(--accent-soft); border: 2px dashed var(--accent); border-radius: 8px; padding: 0.7rem 0.9rem; margin: 0.5rem 0; font-size: 0.9rem; }
+    .example-box .label { font-weight: 700; color: var(--accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .formula-box { background: var(--code-bg); border: 2px solid var(--border); border-radius: 8px; padding: 0.7rem; margin: 0.5rem 0; text-align: center; }
+    .formula-box img { max-width: 100%; height: auto; border-radius: 6px; }
+    .graph-box { background: var(--surface); border: 2px solid var(--border); border-radius: 8px; padding: 0.75rem; margin: 0.6rem 0; overflow-x: auto; }
+    .graph-box svg, .graph-box img { max-width: 100%; height: auto; display: block; }
+    .graph-box .cap { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4; }
+    .graph-box .graph-title { font-size: 0.75rem; font-weight: 700; color: var(--accent); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .graph-box svg { width: 100%; max-width: 320px; margin: 0 auto; }
+    table.summary-table { width: 100%; border-collapse: collapse; margin: 0.6rem 0; font-size: 0.85rem; background: var(--surface); border-radius: 8px; overflow: hidden; border: 2px solid var(--border); }
+    .summary-table th, .summary-table td { padding: 0.5rem 0.65rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .summary-table th { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+    .summary-table tr:last-child td { border-bottom: none; }
+    .nav-list { padding-left: 1rem; margin: 0.35rem 0; font-size: 0.9rem; }
+    .nav-list li { margin: 0.25rem 0; }
+    a { color: var(--accent); font-weight: 600; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img.from-pdf { max-width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); margin: 0.5rem 0; display: block; }
+    .one-liner { font-size: 0.95rem; font-weight: 600; color: var(--accent); margin: 0.5rem 0; }
+    .img-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; margin: 1rem 0; }
+    .img-gallery figure { margin: 0; }
+    .img-gallery img { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--border); }
+    .img-gallery figcaption { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+    footer { margin-top: 2rem; padding-top: 1rem; border-top: 2px solid var(--border); font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Step-by-step: one screen at a time */
+    .step-screen {
+      display: none;
+      min-height: 50vh;
+      animation: stepIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .step-screen.active {
+      display: block;
+    }
+    .step-screen.slide-out-next {
+      animation: slideOutLeft 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .step-screen.slide-out-prev {
+      animation: slideOutRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(24px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOutLeft {
+      to { opacity: 0; transform: translateX(-24px); }
+    }
+    @keyframes slideOutRight {
+      to { opacity: 0; transform: translateX(24px); }
+    }
+
+    /* Progress bar — step-based */
+    .progress-wrap {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: var(--border);
+      z-index: 1000;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--step-num), var(--accent));
+      border-radius: 0 3px 3px 0;
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .progress-label {
+      position: fixed;
+      top: 12px;
+      right: 90px;
+      z-index: 1001;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .step-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px  max(14px, env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      z-index: 999;
+      gap: 12px;
+    }
+    .step-nav .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .nav-btn-prev {
+      background: var(--code-bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+    .nav-btn-next {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 4px 16px rgba(196, 92, 38, 0.4);
+    }
+    .nav-btn:hover:not(:disabled) { transform: scale(1.03); }
+    .nav-btn:active:not(:disabled) { transform: scale(0.98); }
+    .step-dots {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+    .step-dot.active { background: var(--accent); transform: scale(1.2); }
+    .step-dot.done { background: var(--step-num); }
+
+    /* Help icon (inline SVG — no external load) */
+    .help-lottie {
+      width: 100%;
+      max-width: 80px;
+      height: 80px;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+    .help-lottie svg { width: 100%; height: 100%; }
+    .help-lottie .help-icon { fill: var(--accent); opacity: 0.9; }
+    .help-lottie .help-icon-stroke { stroke: var(--step-num); fill: none; }
+    .help-lottie .help-icon-pulse { animation: helpPulse 2s ease-in-out infinite; }
+    @keyframes helpPulse { 0%, 100% { opacity: 0.85; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+    .motivation-toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 998;
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+      max-width: calc(100vw - 40px);
+      text-align: center;
+    }
+    .motivation-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Mobile-friendly */
+    @media (max-width: 640px) {
+      body { padding-top: 8px; font-size: 16px; -webkit-text-size-adjust: 100%; }
+      .container { padding: 0.75rem 1rem calc(76px + env(safe-area-inset-bottom)); max-width: 100%; }
+      header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 1rem; }
+      h1 { font-size: 1.25rem; line-height: 1.3; }
+      .theme-toggle { min-height: 44px; min-width: 44px; padding: 0.5rem 1rem; font-size: 0.85rem; }
+      h2 { font-size: 1.1rem; margin-top: 1.5rem; }
+      h3 { font-size: 0.95rem; }
+      .bite, .tldr, .step-card, .example-box { padding: 0.75rem 1rem; font-size: 0.95rem; }
+      .step-card { padding-left: 3.25rem; }
+      .step-card .step-num { width: 1.75rem; height: 1.75rem; font-size: 0.9rem; left: 0.85rem; top: 0.85rem; }
+      .formula-box { padding: 0.85rem; }
+      .formula-box img { max-width: 100% !important; }
+      .graph-box { padding: 0.85rem; margin: 0.75rem 0; -webkit-overflow-scrolling: touch; }
+      .graph-box svg { max-width: 100%; min-width: 0; }
+      .graph-box .graph-title { font-size: 0.7rem; }
+      .graph-box .cap { font-size: 0.75rem; }
+      .summary-table { font-size: 0.8rem; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .summary-table th, .summary-table td { padding: 0.55rem 0.5rem; white-space: nowrap; }
+      .progress-label { right: 0.75rem; font-size: 0.7rem; top: 10px; }
+      .step-nav { padding: 12px 16px max(12px, env(safe-area-inset-bottom)); gap: 8px; flex-wrap: wrap; justify-content: center; }
+      .step-nav .nav-btn { min-height: 48px; min-width: 44px; padding: 14px 18px; font-size: 0.9rem; flex: 1; max-width: 140px; justify-content: center; }
+      .step-dots { flex-wrap: wrap; justify-content: center; }
+      .step-dot { width: 10px; height: 10px; }
+      .motivation-toast { bottom: 72px; padding: 12px 16px; font-size: 0.8rem; max-width: calc(100vw - 24px); }
+      .help-lottie { max-width: 100px; height: 88px; margin-bottom: 0.75rem; }
+      .img-gallery { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.4rem; }
+      .img-gallery figcaption { font-size: 0.65rem; }
+    }
+    @media (max-width: 380px) {
+      .step-nav .nav-btn { max-width: 120px; padding: 12px 14px; font-size: 0.85rem; }
+      .progress-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-wrap" aria-hidden="true">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <span class="progress-label" id="progressLabel">Step 1 of 10</span>
+  <div class="motivation-toast" id="motivationToast"></div>
+
+  <div class="container">
+    <header>
+      <h1>Lecture 4: Elasticity — Super Simple</h1>
+      <button class="theme-toggle" id="themeBtn" aria-label="Toggle theme">Dark mode</button>
+    </header>
+
+    <!-- Step 0: Intro -->
+    <div class="step-screen active" data-step="0" id="screen-0">
+      <p class="one-liner">Short bits. Easy words. One screen at a time. Use Next ↓</p>
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M32 8L28 12v8h-4a4 4 0 0 0-4 4v4a4 4 0 0 0 4 4h4v12h8V32h4a4 4 0 0 0 4-4v-4a4 4 0 0 0-4-4h-4v-8L32 8z"/><circle class="help-icon" cx="32" cy="48" r="3" opacity="0.7"/></svg>
+      </div>
+      <h2>What you’ll learn</h2>
+      <ul class="nav-list">
+        <li>1. What is elasticity?</li>
+        <li>2. Price elasticity (formula)</li>
+        <li>3. Elastic vs inelastic</li>
+        <li>4. Total revenue</li>
+        <li>5. Income elasticity</li>
+        <li>6. Cross elasticity</li>
+        <li>7. Supply elasticity</li>
+        <li>8. Recap</li>
+        <li>9. All lecture images</li>
+      </ul>
+    </div>
+
+    <!-- Step 1: What is elasticity -->
+    <div class="step-screen" data-step="1" id="screen-1">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M32 10c-8 0-14 6-14 14 0 4 2 8 5 10v2h18v-2c3-2 5-6 5-10 0-8-6-14-14-14zm-4 28v6h8v-6h-8zm0 10v4h8v-4h-8z"/></svg>
+      </div>
+    <h2 id="what">1. What is elasticity?</h2>
+    <div class="bite">Elasticity = <strong>how much one thing moves when you change another.</strong></div>
+    <div class="tldr"><strong>Like a rubber band.</strong> Pull a little → stretches a lot = elastic. Pull a lot → barely moves = inelastic.</div>
+    <p>We care: price or income changes → do people buy way more/less (elastic) or almost the same (inelastic)?</p>
+    </div>
+
+    <!-- Step 2: Price elasticity -->
+    <div class="step-screen" data-step="2" id="screen-2">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M12 12h40v8H12zm0 12h28v8H12zm0 12h36v8H12zm0 12h20v8H12z"/></svg>
+      </div>
+    <h2 id="price">2. Price elasticity of demand</h2>
+    <div class="step-card"><span class="step-num">1</span>Price goes up or down → people buy more or less. <strong>Price elasticity</strong> = how much that “more or less” is.</div>
+    <div class="formula-box">
+      <p style="margin:0 0 0.35rem 0; font-weight:600; font-size:0.9rem;">The formula (from your slides):</p>
+      <img src="lecture4_images/img-003.png" alt="Price elasticity = % change quantity demanded ÷ % change price" class="from-pdf" style="max-width:380px;">
+    </div>
+    <div class="tldr"><strong>In 3 words:</strong> Response to price.</div>
+    <div class="example-box"><div class="label">Example</div>Ice cream gets expensive → lots of people buy less. So demand is <strong>elastic</strong> (big response).</div>
+    </div>
+
+    <!-- Step 3: Elastic vs inelastic -->
+    <div class="step-screen" data-step="3" id="screen-3">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M8 20h12v24H8zm36 0h12v24H44zM20 28h24v2H20zm0 6h24v2H20zM32 14l4 8h-8l4-8z"/></svg>
+      </div>
+    <h2 id="elastic-inelastic">3. Elastic vs inelastic</h2>
+    <div class="bite"><strong>Elastic (E &gt; 1):</strong> Price changes a little → quantity changes a LOT. (e.g. fancy chocolates.)</div>
+    <div class="bite"><strong>Inelastic (E &lt; 1):</strong> Price changes a LOT → quantity changes a little. (e.g. medicine you need every day.)</div>
+
+    <h3>Perfectly inelastic (E = 0)</h3>
+    <p>Price goes up or down → people buy the <strong>same amount</strong>. Demand curve is vertical.</p>
+    <div class="graph-box">
+      <p class="graph-title">Quantity does not change when price changes</p>
+      <svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="inel-desc">
+        <defs><style>.ax{stroke:var(--text-muted);stroke-width:1;fill:none}.curve{stroke:var(--accent);stroke-width:2.5;fill:none}.lbl{fill:var(--text);font-family:system-ui,sans-serif;font-size:11px;font-weight:600}.muted{fill:var(--text-muted);font-size:10px}</style></defs>
+        <line x1="44" y1="24" x2="44" y2="172" class="ax"/>
+        <line x1="44" y1="172" x2="212" y2="172" class="ax"/>
+        <line x1="44" y1="40" x2="44" y2="172" class="curve"/>
+        <text x="42" y="188" class="lbl">Quantity (Q)</text>
+        <text x="200" y="28" class="lbl">Price (P)</text>
+        <text x="88" y="108" class="lbl" fill="var(--accent)">D</text>
+        <text x="78" y="124" class="muted">E = 0</text>
+        <text x="64" y="140" class="muted">Same Q</text>
+      </svg>
+      <p class="cap" id="inel-desc">Example: Insulin for a diabetic — they need the same amount no matter the price.</p>
+    </div>
+
+    <h3>Perfectly elastic (E = ∞)</h3>
+    <p>Tiny price change → people go from buying <strong>zero</strong> to <strong>all they can</strong>. Demand curve is flat.</p>
+    <div class="graph-box">
+      <p class="graph-title">At any price above this level, quantity demanded is zero</p>
+      <svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="elast-desc">
+        <defs><style>.ax2{stroke:var(--text-muted);stroke-width:1;fill:none}.curve2{stroke:var(--step-num);stroke-width:2.5;fill:none}.lbl2{fill:var(--text);font-family:system-ui,sans-serif;font-size:11px;font-weight:600}.muted2{fill:var(--text-muted);font-size:10px}</style></defs>
+        <line x1="44" y1="24" x2="44" y2="172" class="ax2"/>
+        <line x1="44" y1="172" x2="212" y2="172" class="ax2"/>
+        <line x1="44" y1="56" x2="212" y2="56" class="curve2"/>
+        <text x="42" y="188" class="lbl2">Quantity (Q)</text>
+        <text x="200" y="62" class="lbl2">Price (P)</text>
+        <text x="128" y="100" class="lbl2" fill="var(--step-num)">D</text>
+        <text x="118" y="116" class="muted2">E = ∞</text>
+      </svg>
+      <p class="cap" id="elast-desc">Example: A small farmer selling wheat — raise price a bit and buyers switch to others.</p>
+    </div>
+    </div>
+
+    <!-- Step 4: Total revenue -->
+    <div class="step-screen" data-step="4" id="screen-4">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle class="help-icon help-icon-pulse" cx="32" cy="32" r="18"/><path fill="var(--bg)" d="M32 18v28M26 24h12M26 32h12M26 40h12"/></svg>
+      </div>
+    <h2 id="total-revenue">4. Total revenue (what sellers earn)</h2>
+    <div class="step-card"><span class="step-num">2</span><strong>Total revenue = Price × Quantity.</strong> So TR = P × Q.</div>
+    <p>When you change price, does total revenue go up or down? It depends whether demand is elastic or inelastic.</p>
+
+    <h3>Total revenue = P × Q</h3>
+    <div class="graph-box">
+      <p class="graph-title">Revenue is the area (price × quantity)</p>
+      <svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Total revenue diagram">
+        <defs><style>.gax{stroke:var(--text-muted);stroke-width:1;fill:none}.gfill{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2;rx:4}.gtxt{fill:var(--text);font-family:system-ui,sans-serif;font-size:12px}.gacc{fill:var(--accent);font-weight:700}</style></defs>
+        <rect x="56" y="36" width="128" height="88" class="gfill"/>
+        <text x="120" y="72" class="gtxt gacc" text-anchor="middle">P × Q</text>
+        <text x="120" y="92" class="gtxt" text-anchor="middle">= Total revenue</text>
+        <text x="120" y="112" class="gtxt" fill="var(--text-muted)" font-size="11" text-anchor="middle">e.g. $4 × 100 = $400</text>
+        <line x1="56" y1="140" x2="184" y2="140" class="gax"/>
+        <line x1="56" y1="140" x2="56" y2="36" class="gax"/>
+        <text x="120" y="158" class="gtxt" fill="var(--text-muted)" font-size="10" text-anchor="middle">Demand: price ↑ → Q ↓</text>
+      </svg>
+    </div>
+
+    <h3>Inelastic demand: price UP → revenue UP</h3>
+    <p>People still buy almost the same, so higher price means more money for sellers.</p>
+    <div class="graph-box">
+      <p class="graph-title">Price $1 → $3: revenue $100 → $240</p>
+      <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Inelastic demand total revenue">
+        <defs><style>.ax3{stroke:var(--text-muted);stroke-width:1;fill:none}.dc3{stroke:var(--accent);stroke-width:2;fill:none}.t3{fill:var(--text);font-family:system-ui,sans-serif;font-size:11px}.rev3{fill:var(--step-num);font-weight:600;font-size:10px}</style></defs>
+        <line x1="48" y1="24" x2="48" y2="158" class="ax3"/>
+        <line x1="48" y1="158" x2="282" y2="158" class="ax3"/>
+        <path d="M 48 38 L 220 158" class="dc3"/>
+        <text x="50" y="32" class="t3">$3</text>
+        <text x="50" y="162" class="t3">$1</text>
+        <text x="228" y="162" class="t3">80</text>
+        <text x="278" y="162" class="t3">100</text>
+        <text x="95" y="55" class="rev3">Rev $240</text>
+        <text x="165" y="135" class="rev3">Rev $100</text>
+      </svg>
+      <p class="cap">Inelastic: quantity falls only a little when price rises, so total revenue increases.</p>
+    </div>
+
+    <h3>Elastic demand: price UP → revenue DOWN</h3>
+    <p>People buy much less, so higher price means less money for sellers.</p>
+    <div class="graph-box">
+      <p class="graph-title">Price $4 → $5: revenue $200 → $100</p>
+      <svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Elastic demand total revenue">
+        <defs><style>.ax4{stroke:var(--text-muted);stroke-width:1;fill:none}.dc4{stroke:var(--step-num);stroke-width:2;fill:none}.t4{fill:var(--text);font-family:system-ui,sans-serif;font-size:11px}.rev4{fill:var(--accent);font-weight:600;font-size:10px}</style></defs>
+        <line x1="48" y1="24" x2="48" y2="158" class="ax4"/>
+        <line x1="48" y1="158" x2="282" y2="158" class="ax4"/>
+        <path d="M 48 142 L 220 38" class="dc4"/>
+        <text x="50" y="146" class="t4">$4</text>
+        <text x="50" y="36" class="t4">$5</text>
+        <text x="212" y="162" class="t4">20</text>
+        <text x="278" y="162" class="t4">50</text>
+        <text x="118" y="95" class="rev4">Rev $200</text>
+        <text x="165" y="55" class="rev4">Rev $100</text>
+      </svg>
+      <p class="cap">Elastic: quantity falls a lot when price rises, so total revenue decreases.</p>
+    </div>
+
+    <div class="tldr"><strong>Remember:</strong> Elastic → price up = revenue down. Inelastic → price up = revenue up.</div>
+    <p class="graph-title" style="margin-top:1rem;">Summary: demand type and total revenue</p>
+    <table class="summary-table">
+      <thead><tr><th>Demand</th><th>When price goes UP</th><th>When price goes DOWN</th></tr></thead>
+      <tbody>
+        <tr><td>Elastic (E &gt; 1)</td><td>Total revenue ↓</td><td>Total revenue ↑</td></tr>
+        <tr><td>Unit elastic (E = 1)</td><td>Unchanged</td><td>Unchanged</td></tr>
+        <tr><td>Inelastic (E &lt; 1)</td><td>Total revenue ↑</td><td>Total revenue ↓</td></tr>
+      </tbody>
+    </table>
+
+    <h3>What makes demand elastic or inelastic?</h3>
+    <ul class="nav-list">
+      <li><strong>Substitutes:</strong> Lots of similar stuff (e.g. other ice cream) → more elastic.</li>
+      <li><strong>Big part of budget:</strong> Rent, food → you react more → more elastic.</li>
+      <li><strong>Luxury vs need:</strong> Luxury = elastic. Need (medicine, rice) = inelastic.</li>
+    </ul>
+    </div>
+
+    <!-- Step 5: Income elasticity -->
+    <div class="step-screen" data-step="5" id="screen-5">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M12 48V24l8 8 12-16 12 12 12-16v36H12z"/></svg>
+      </div>
+    <h2 id="income">5. Income elasticity</h2>
+    <div class="step-card"><span class="step-num">3</span>When your <strong>income</strong> goes up or down, do you buy <strong>more</strong> or <strong>less</strong> of this thing?</div>
+    <div class="formula-box">
+      <img src="lecture4_images/img-020.png" alt="Income elasticity = % change quantity ÷ % change income" class="from-pdf" style="max-width:360px;">
+    </div>
+    <div class="tldr"><strong>Positive</strong> = normal good (income up → buy more). <strong>Negative</strong> = inferior good (income up → buy less, you switch to better stuff).</div>
+    <div class="example-box"><div class="label">Example</div>Normal: more money → more fruits, gym. Inferior: more money → less instant noodles, more real food.</div>
+    </div>
+
+    <!-- Step 6: Cross elasticity -->
+    <div class="step-screen" data-step="6" id="screen-6">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M20 32h24M32 20v24M28 28l8-8 8 8-8 8zM36 36l-8-8-8 8 8 8z"/></svg>
+      </div>
+    <h2 id="cross">6. Cross elasticity</h2>
+    <div class="step-card"><span class="step-num">4</span>When the <strong>price of another good</strong> changes, how much does <strong>demand for this good</strong> change?</div>
+    <div class="formula-box">
+      <img src="lecture4_images/img-022.png" alt="Cross elasticity = % change Q of good ÷ % change P of substitute or complement" class="from-pdf" style="max-width:380px;">
+    </div>
+    <div class="example-box">
+      <div class="label">From your lecture (substitutes)</div>
+      <img src="lecture4_images/img-026.png" alt="Coke and Pepsi: price of one up → demand for other up" class="from-pdf">
+      <p><strong>Coke &amp; Pepsi:</strong> Coke price up → people buy more Pepsi. Same the other way. = <strong>Substitutes</strong> (positive cross elasticity).</p>
+    </div>
+    <table class="summary-table">
+      <thead><tr><th>Cross elasticity</th><th>Meaning</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Positive</td><td>Substitutes</td><td>Coke &amp; Pepsi, tea &amp; coffee</td></tr>
+        <tr><td>Negative</td><td>Complements (go together)</td><td>Car &amp; petrol, phone &amp; SIM</td></tr>
+        <tr><td>Zero</td><td>Unrelated</td><td>Books &amp; bananas</td></tr>
+      </tbody>
+    </table>
+    <div class="example-box"><div class="label">Complements</div>Petrol price up → people buy fewer cars (or smaller cars). Price of one up → demand for the other down = <strong>complements</strong>.</div>
+    </div>
+
+    <!-- Step 7: Supply elasticity -->
+    <div class="step-screen" data-step="7" id="screen-7">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-pulse" d="M12 36h40v16H12zM20 36V24l12-8 12 8v12"/></svg>
+      </div>
+    <h2 id="supply">7. Supply elasticity</h2>
+    <div class="step-card"><span class="step-num">5</span>When <strong>price</strong> changes, how much do <strong>sellers</strong> change how much they make/sell?</div>
+    <div class="formula-box">
+      <img src="lecture4_images/img-034.png" alt="Price elasticity of supply = % change quantity supplied ÷ % change price" class="from-pdf" style="max-width:360px;">
+    </div>
+    <div class="tldr"><strong>Elastic supply:</strong> Price up a little → they make a lot more. <strong>Inelastic:</strong> Price up a lot → they can’t make much more.</div>
+    <div class="example-box"><div class="label">Example</div>Elastic: t-shirts (factories can make more fast). Inelastic: rare paintings (can’t make more originals).</div>
+    </div>
+
+    <!-- Step 8: Recap -->
+    <div class="step-screen" data-step="8" id="screen-8">
+      <div class="help-lottie">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="help-icon help-icon-stroke help-icon-pulse" d="M12 32l14 14 26-26" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    <h2 id="recap">Recap (read this before the test)</h2>
+    <ul class="nav-list">
+      <li>Elasticity = how much one thing responds to another.</li>
+      <li>Price elasticity: E &gt; 1 = elastic (big response), E &lt; 1 = inelastic (small response).</li>
+      <li>TR = P × Q. Elastic: P up → TR down. Inelastic: P up → TR up.</li>
+      <li>Income: positive = normal good, negative = inferior good.</li>
+      <li>Cross: positive = substitutes, negative = complements.</li>
+      <li>Supply elasticity = how much sellers change how much they make when price changes.</li>
+    </ul>
+    </div>
+
+    <!-- Step 9: All images from PDF -->
+    <div class="step-screen" data-step="9" id="screen-9">
+    <h2 id="all-images">All images from the lecture (every figure from the PDF)</h2>
+    <p>Below are all the images we extracted from Lecture 4. Use them to match what you see in the slides.</p>
+    <div class="img-gallery">
+      <figure><img src="lecture4_images/img-000.png" alt="Lecture fig 0"><figcaption>Slide 1</figcaption></figure>
+      <figure><img src="lecture4_images/img-001.png" alt="Lecture fig 1"><figcaption>Slide 2</figcaption></figure>
+      <figure><img src="lecture4_images/img-002.png" alt="Lecture fig 2"><figcaption>Slide 3</figcaption></figure>
+      <figure><img src="lecture4_images/img-003.png" alt="Price elasticity formula"><figcaption>Formula PED</figcaption></figure>
+      <figure><img src="lecture4_images/img-004.png" alt="Lecture fig 4"><figcaption>Fig 4</figcaption></figure>
+      <figure><img src="lecture4_images/img-005.png" alt="Lecture fig 5"><figcaption>Slide 4</figcaption></figure>
+      <figure><img src="lecture4_images/img-006.png" alt="Lecture fig 6"><figcaption>Slide 5</figcaption></figure>
+      <figure><img src="lecture4_images/img-007.png" alt="Lecture fig 7"><figcaption>Slide 6</figcaption></figure>
+      <figure><img src="lecture4_images/img-008.png" alt="Lecture fig 8"><figcaption>Graph 6a</figcaption></figure>
+      <figure><img src="lecture4_images/img-009.png" alt="Lecture fig 9"><figcaption>Fig 9</figcaption></figure>
+      <figure><img src="lecture4_images/img-010.png" alt="Lecture fig 10"><figcaption>Slide 7</figcaption></figure>
+      <figure><img src="lecture4_images/img-011.png" alt="Lecture fig 11"><figcaption>Graph 7</figcaption></figure>
+      <figure><img src="lecture4_images/img-012.png" alt="Lecture fig 12"><figcaption>Fig 12</figcaption></figure>
+      <figure><img src="lecture4_images/img-013.png" alt="Lecture fig 13"><figcaption>Slide 8</figcaption></figure>
+      <figure><img src="lecture4_images/img-014.png" alt="Lecture fig 14"><figcaption>Slide 10</figcaption></figure>
+      <figure><img src="lecture4_images/img-015.png" alt="Lecture fig 15"><figcaption>Slide 11</figcaption></figure>
+      <figure><img src="lecture4_images/img-016.png" alt="Lecture fig 16"><figcaption>Slide 12</figcaption></figure>
+      <figure><img src="lecture4_images/img-017.png" alt="Lecture fig 17"><figcaption>Slide 13</figcaption></figure>
+      <figure><img src="lecture4_images/img-018.png" alt="Lecture fig 18"><figcaption>Slide 14</figcaption></figure>
+      <figure><img src="lecture4_images/img-019.png" alt="Lecture fig 19"><figcaption>Summary 14</figcaption></figure>
+      <figure><img src="lecture4_images/img-020.png" alt="Income elasticity formula"><figcaption>Income formula</figcaption></figure>
+      <figure><img src="lecture4_images/img-021.png" alt="Lecture fig 21"><figcaption>Slide 15</figcaption></figure>
+      <figure><img src="lecture4_images/img-022.png" alt="Cross elasticity formula"><figcaption>Cross formula</figcaption></figure>
+      <figure><img src="lecture4_images/img-023.png" alt="Lecture fig 23"><figcaption>Fig 23</figcaption></figure>
+      <figure><img src="lecture4_images/img-024.png" alt="Lecture fig 24"><figcaption>Slide 16</figcaption></figure>
+      <figure><img src="lecture4_images/img-025.png" alt="Lecture fig 25"><figcaption>Slide 17</figcaption></figure>
+      <figure><img src="lecture4_images/img-026.png" alt="Coke Pepsi substitutes"><figcaption>Coke/Pepsi</figcaption></figure>
+      <figure><img src="lecture4_images/img-027.png" alt="Lecture fig 27"><figcaption>Slide 18</figcaption></figure>
+      <figure><img src="lecture4_images/img-028.png" alt="Lecture fig 28"><figcaption>Fig 18</figcaption></figure>
+      <figure><img src="lecture4_images/img-029.png" alt="Lecture fig 29"><figcaption>Slide 19</figcaption></figure>
+      <figure><img src="lecture4_images/img-030.png" alt="Lecture fig 30"><figcaption>Fig 19a</figcaption></figure>
+      <figure><img src="lecture4_images/img-031.png" alt="Lecture fig 31"><figcaption>Fig 19b</figcaption></figure>
+      <figure><img src="lecture4_images/img-032.png" alt="Lecture fig 32"><figcaption>Slide 20</figcaption></figure>
+      <figure><img src="lecture4_images/img-033.png" alt="Lecture fig 33"><figcaption>Table 21</figcaption></figure>
+      <figure><img src="lecture4_images/img-034.png" alt="Supply elasticity formula"><figcaption>Supply formula</figcaption></figure>
+      <figure><img src="lecture4_images/img-035.png" alt="Lecture fig 35"><figcaption>Slide 21</figcaption></figure>
+      <figure><img src="lecture4_images/img-036.png" alt="Lecture fig 36"><figcaption>Slide 22</figcaption></figure>
+      <figure><img src="lecture4_images/img-037.png" alt="Lecture fig 37"><figcaption>Slide 23</figcaption></figure>
+    </div>
+    </div>
+
+    <footer>Lecture 4 — Elasticity of Demand and Supply. All content simplified. All extracted PDF images included above.</footer>
+  </div>
+
+  <nav class="step-nav" aria-label="Step navigation">
+    <button type="button" class="nav-btn nav-btn-prev" id="btnPrev" aria-label="Previous step">← Previous</button>
+    <div class="step-dots" id="stepDots" aria-hidden="true"></div>
+    <button type="button" class="nav-btn nav-btn-next" id="btnNext" aria-label="Next step">Next →</button>
+  </nav>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var progressFill = document.getElementById('progressFill');
+      var progressLabel = document.getElementById('progressLabel');
+      var toast = document.getElementById('motivationToast');
+      var btnPrev = document.getElementById('btnPrev');
+      var btnNext = document.getElementById('btnNext');
+      var stepDots = document.getElementById('stepDots');
+      var screens = document.querySelectorAll('.step-screen');
+      var totalSteps = screens.length;
+      var currentStep = 0;
+
+      var motivationByStep = [
+        'Let\'s go. Tap Next when you\'re ready.',
+        'You got this. One idea at a time.',
+        'Nice. Formula = just “response to price”.',
+        'Elastic vs inelastic — you\'re nailing it.',
+        'Revenue = P × Q. Keep going.',
+        'Halfway there. Stay curious.',
+        'Coke & Pepsi = substitutes. Easy.',
+        'Almost done. One more concept.',
+        'Recap — you\'re almost there.',
+        'Done! You finished the whole thing.'
+      ];
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toast._tid);
+        toast._tid = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+      }
+
+      function goToStep(n) {
+        n = Math.max(0, Math.min(n, totalSteps - 1));
+        if (n === currentStep) return;
+        var dir = n > currentStep ? 'next' : 'prev';
+        var oldScreen = document.getElementById('screen-' + currentStep);
+        if (oldScreen) {
+          oldScreen.classList.remove('active');
+          oldScreen.classList.add(dir === 'next' ? 'slide-out-next' : 'slide-out-prev');
+          setTimeout(function () {
+            oldScreen.classList.remove('slide-out-next', 'slide-out-prev');
+          }, 360);
+        }
+        currentStep = n;
+        var newScreen = document.getElementById('screen-' + currentStep);
+        if (newScreen) {
+          newScreen.classList.add('active');
+          newScreen.style.animation = 'none';
+          newScreen.offsetHeight;
+          newScreen.style.animation = '';
+        }
+        updateProgress();
+        updateDots();
+        btnPrev.disabled = currentStep === 0;
+        btnNext.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Next →';
+        showToast(motivationByStep[currentStep]);
+      }
+
+      function updateProgress() {
+        var pct = totalSteps <= 1 ? 100 : (currentStep / (totalSteps - 1)) * 100;
+        progressFill.style.width = pct + '%';
+        progressLabel.textContent = 'Step ' + (currentStep + 1) + ' of ' + totalSteps;
+      }
+
+      function updateDots() {
+        stepDots.innerHTML = '';
+        for (var i = 0; i < totalSteps; i++) {
+          var dot = document.createElement('span');
+          dot.className = 'step-dot' + (i === currentStep ? ' active' : '') + (i < currentStep ? ' done' : '');
+          dot.setAttribute('aria-current', i === currentStep ? 'step' : 'false');
+          stepDots.appendChild(dot);
+        }
+      }
+
+      btnPrev.addEventListener('click', function () { goToStep(currentStep - 1); });
+      btnNext.addEventListener('click', function () { goToStep(currentStep + 1); });
+      updateProgress();
+      updateDots();
+      btnPrev.disabled = true;
+      setTimeout(function () { showToast(motivationByStep[0]); }, 500);
+
+      var themeBtn = document.getElementById('themeBtn');
+      var stored = localStorage.getItem('theme');
+      if (stored === 'dark') { root.setAttribute('data-theme', 'dark'); themeBtn.textContent = 'Light mode'; }
+      else { root.removeAttribute('data-theme'); themeBtn.textContent = 'Dark mode'; }
+      themeBtn.addEventListener('click', function () {
+        var isDark = root.getAttribute('data-theme') === 'dark';
+        if (isDark) { root.removeAttribute('data-theme'); themeBtn.textContent = 'Dark mode'; localStorage.setItem('theme', 'light'); }
+        else { root.setAttribute('data-theme', 'dark'); themeBtn.textContent = 'Light mode'; localStorage.setItem('theme', 'dark'); }
+      });
+    })();
+  </script>
+</body>
+</html>
